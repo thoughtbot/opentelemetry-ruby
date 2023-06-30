@@ -14,12 +14,8 @@ module OpenTelemetry
         Key = Struct.new(:name, :version)
         private_constant(:Key)
 
-        def initialize(resource: OpenTelemetry::SDK::Resources::Resource.create)
-          @mutex = Mutex.new
-          @meter_registry = {}
-          @stopped = false
-          @metric_readers = []
-          @resource = resource
+        def initialize(resource: OpenTelemetry::SDK::Resources::Resource.default)
+          super
         end
 
         # Returns a {Meter} instance.
