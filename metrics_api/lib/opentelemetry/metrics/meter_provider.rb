@@ -9,7 +9,7 @@ module OpenTelemetry
     # No-op implementation of a meter provider.
     class MeterProvider
       NOOP_METER = Meter.new('no-op')
-      Key = Struct.new(:name, :version)
+      Key = Struct.new(:name, :version, :schema_url)
 
       private_constant :NOOP_METER, :Key
 
