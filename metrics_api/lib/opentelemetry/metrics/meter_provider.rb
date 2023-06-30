@@ -12,6 +12,8 @@ module OpenTelemetry
 
       private_constant :NOOP_METER
 
+      attr_reader :resource, :metric_readers
+
       def initialize(resource: nil)
         @resource = resource
 

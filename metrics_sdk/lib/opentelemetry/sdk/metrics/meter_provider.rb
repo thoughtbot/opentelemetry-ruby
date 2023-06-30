@@ -14,8 +14,6 @@ module OpenTelemetry
         Key = Struct.new(:name, :version)
         private_constant(:Key)
 
-        attr_reader :resource, :metric_readers
-
         def initialize(resource: OpenTelemetry::SDK::Resources::Resource.create)
           @mutex = Mutex.new
           @meter_registry = {}
