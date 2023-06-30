@@ -15,19 +15,43 @@ module OpenTelemetry
           super
         end
 
-        # Returns a {Meter} instance.
+        # @param [String] name
+        #   Uniquely identifies the instrumentation scope, such as the instrumentation library
+        #   (e.g. io.opentelemetry.contrib.mongodb), package, module or class name
+        # @param [optional String] version
+        #   Version of the instrumentation scope if the scope has a version (e.g. a library version)
+        # @param [optional String] schema_url
+        #   Schema URL that should be recorded in the emitted telemetry
+        # @param [optional Hash{String => String, Numeric, Boolean, Array<String, Numeric, Boolean>}] attributes
+        #   Instrumentation scope attributes to associate with emitted telemetry
         #
-        # @param [String] name Instrumentation package name
-        # @param [optional String] version Instrumentation package version
-        #
-        # @return [Meter]
-        def meter(name, version: nil)
-          version ||= ''
+        # @return [SDK::Metrics::Meter]
+        def meter(name, version: nil, schema_url: nil, attributes: nil)
           if @stopped
             OpenTelemetry.logger.warn 'calling MeterProvider#meter after shutdown, a noop meter will be returned.'
-            OpenTelemetry::Metrics::Meter.new
+
+            NOOP_METER
           else
-            @mutex.synchronize { @meter_registry[Key.new(name, version)] ||= Meter.new(name, version, self) }
+            if name.nil? || name.empty?
+              OpenTelemetry.logger.warn 'Invalid name provided to MeterProvider#meter: nil or empty'
+            end
+
+            # TODO: Check if we should pass self to Meter.new
+            meter = Meter.new(
+              name,
+              version: version,
+              schema_url: schema_url,
+              attributes: attributes
+            )
+            key = Key.new(
+              meter.name,
+              meter.version,
+              meter.schema_url
+            )
+
+            @mutex.synchronize do
+              @meter_registry[key] ||= meter
+            end
           end
         end
 

@@ -12,21 +12,6 @@ module OpenTelemetry
       # {Meter} is the SDK implementation of {OpenTelemetry::Metrics::Meter}.
       class Meter < OpenTelemetry::Metrics::Meter
         # @api private
-        #
-        # Returns a new {Meter} instance.
-        #
-        # @param [String] name Instrumentation package name
-        # @param [String] version Instrumentation package version
-        #
-        # @return [Meter]
-        def initialize(name, version, meter_provider)
-          @mutex = Mutex.new
-          @instrument_registry = {}
-          @instrumentation_scope = InstrumentationScope.new(name, version)
-          @meter_provider = meter_provider
-        end
-
-        # @api private
         def add_metric_reader(metric_reader)
           @instrument_registry.each do |_n, instrument|
             instrument.register_with_new_metric_store(metric_reader.metric_store)
