@@ -8,16 +8,14 @@ module OpenTelemetry
   module Internal
     # @api private
     #
-    # {ProxyMeter} is an implementation of {OpenTelemetry::Trace::Meter}. It is returned from
-    # the ProxyMeterProvider until a delegate meter provider is installed. After the delegate
-    # meter provider is installed, the ProxyMeter will delegate to the corresponding "real"
-    # meter.
+    # {ProxyMeter} is an implementation of {OpenTelemetry::Metrics::Meter}.
+    # It is returned from the ProxyMeterProvider until a delegate meter provider
+    # is installed. After the delegate meter provider is installed,
+    # the ProxyMeter will delegate to the corresponding "real" meter.
     class ProxyMeter < Metrics::Meter
-      # Returns a new {ProxyMeter} instance.
-      #
-      # @return [ProxyMeter]
-      def initialize
+      def initialize(name, version: nil, schema_url: nil, attributes: nil)
         super
+
         @delegate = nil
       end
 
@@ -38,17 +36,55 @@ module OpenTelemetry
 
       private
 
-      def create_instrument(kind, name, unit, description, callback)
+      def create_instrument(kind, name, unit, description, advice, callbacks)
         super do
-          next ProxyInstrument.new(kind, name, unit, description, callback) if @delegate.nil?
-
-          case kind
-          when :counter then @delegate.create_counter(name, unit: unit, description: description)
-          when :histogram then @delegate.create_histogram(name, unit: unit, description: description)
-          when :up_down_counter then @delegate.create_up_down_counter(name, unit: unit, description: description)
-          when :observable_counter then @delegate.create_observable_counter(name, unit: unit, description: description, callback: callback)
-          when :observable_gauge then @delegate.create_observable_gauge(name, unit: unit, description: description, callback: callback)
-          when :observable_up_down_counter then @delegate.create_observable_up_down_counter(name, unit: unit, description: description, callback: callback)
+          if @delegate.nil?
+            ProxyInstrument.new(kind, name, unit, description, advice, callbacks)
+          else
+            case kind
+            when :counter
+              @delegate.create_counter(
+                name,
+                unit: unit,
+                description: description,
+                advice: advice
+              )
+            when :histogram
+              @delegate.create_histogram(
+                name,
+                unit: unit,
+                description: description,
+                advice: advice
+              )
+            when :up_down_counter
+              @delegate.create_up_down_counter(
+                name,
+                unit: unit,
+                description: description,
+                advice: advice
+              )
+            when :observable_counter
+              @delegate.create_observable_counter(
+                name,
+                unit: unit,
+                description: description,
+                callbacks: callbacks
+              )
+            when :observable_gauge
+              @delegate.create_observable_gauge(
+                name,
+                unit: unit,
+                description: description,
+                callbacks: callbacks
+              )
+            when :observable_up_down_counter
+              @delegate.create_observable_up_down_counter(
+                name,
+                unit: unit,
+                description: description,
+                callbacks: callbacks
+              )
+            end
           end
         end
       end
