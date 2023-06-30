@@ -11,9 +11,6 @@ module OpenTelemetry
     module Metrics
       # {MeterProvider} is the SDK implementation of {OpenTelemetry::Metrics::MeterProvider}.
       class MeterProvider < OpenTelemetry::Metrics::MeterProvider
-        Key = Struct.new(:name, :version)
-        private_constant(:Key)
-
         def initialize(resource: OpenTelemetry::SDK::Resources::Resource.default)
           super
         end
