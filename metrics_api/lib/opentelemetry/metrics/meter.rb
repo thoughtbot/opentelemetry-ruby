@@ -33,6 +33,13 @@ module OpenTelemetry
         @schema_url = schema_url || ''
         @attributes = attributes || {}
 
+        @instrumentation_scope = InstrumentationScope.new(
+          @name,
+          @version,
+          @schema_url,
+          @attributes
+        )
+
         @mutex = Mutex.new
         @instrument_registry = {}
       end
