@@ -13,7 +13,7 @@ module OpenTelemetry
     # It delegates to a "real" MeterProvider after the global meter provider is registered.
     # It returns {ProxyMeter} instances until the delegate is installed.
     class ProxyMeterProvider < Metrics::MeterProvider
-      def initialize(resource: nil)
+      def initialize(*args, **kwargs)
         super
 
         @delegate = nil
