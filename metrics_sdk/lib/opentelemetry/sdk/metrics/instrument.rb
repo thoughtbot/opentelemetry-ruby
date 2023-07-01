@@ -13,10 +13,10 @@ module OpenTelemetry
   end
 end
 
-require 'opentelemetry/sdk/metrics/instrument/synchronous_instrument'
 require 'opentelemetry/sdk/metrics/instrument/counter'
 require 'opentelemetry/sdk/metrics/instrument/histogram'
+require 'opentelemetry/sdk/metrics/instrument/up_down_counter'
+
 require 'opentelemetry/sdk/metrics/instrument/observable_counter'
 require 'opentelemetry/sdk/metrics/instrument/observable_gauge'
 require 'opentelemetry/sdk/metrics/instrument/observable_up_down_counter'
-require 'opentelemetry/sdk/metrics/instrument/up_down_counter'
