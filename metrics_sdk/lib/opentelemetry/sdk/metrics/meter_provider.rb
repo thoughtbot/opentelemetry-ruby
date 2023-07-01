@@ -32,21 +32,13 @@ module OpenTelemetry
 
             NOOP_METER
           else
-            if name.nil? || name.empty?
-              OpenTelemetry.logger.warn 'Invalid name provided to MeterProvider#meter: nil or empty'
-            end
-
-            # TODO: Check if we should pass self to Meter.new
+            key = build_key_for_meter(name, version, schema_url)
             meter = Meter.new(
               name,
               version: version,
               schema_url: schema_url,
-              attributes: attributes
-            )
-            key = Key.new(
-              meter.name,
-              meter.version,
-              meter.schema_url
+              attributes: attributes,
+              # TODO: Check if we should pass self to Meter.new
             )
 
             @mutex.synchronize do
@@ -147,6 +139,16 @@ module OpenTelemetry
         # The schema_url of the Meter (optional).
         def add_view
           # TODO: For each meter add this view to all applicable instruments
+        end
+
+        private
+
+        def build_key_for_meter(name, version, schema_url)
+          if name.nil? || name.empty?
+            OpenTelemetry.logger.warn 'Invalid name provided to MeterProvider#meter: nil or empty'
+          end
+
+          Key.new(name, version, schema_url)
         end
       end
     end

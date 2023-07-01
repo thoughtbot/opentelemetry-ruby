@@ -19,8 +19,8 @@ module OpenTelemetry
         @resource = resource
 
         @mutex = Mutex.new
-        @meter_registry = {}
         @stopped = false
+        @meter_registry = {}
         @metric_readers = []
       end
 
