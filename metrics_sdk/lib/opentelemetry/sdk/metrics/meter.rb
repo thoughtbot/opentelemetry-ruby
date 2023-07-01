@@ -18,16 +18,77 @@ module OpenTelemetry
           end
         end
 
-        def register_instrument(kind, name, unit, description, callback)
-          super do
-            case kind
-            when :counter then OpenTelemetry::SDK::Metrics::Instrument::Counter.new(name, unit, description, @instrumentation_scope, @meter_provider)
-            when :observable_counter then OpenTelemetry::SDK::Metrics::Instrument::ObservableCounter.new(name, unit, description, callback, @instrumentation_scope, @meter_provider)
-            when :histogram then OpenTelemetry::SDK::Metrics::Instrument::Histogram.new(name, unit, description, @instrumentation_scope, @meter_provider)
-            when :observable_gauge then OpenTelemetry::SDK::Metrics::Instrument::ObservableGauge.new(name, unit, description, callback, @instrumentation_scope, @meter_provider)
-            when :up_down_counter then OpenTelemetry::SDK::Metrics::Instrument::UpDownCounter.new(name, unit, description, @instrumentation_scope, @meter_provider)
-            when :observable_up_down_counter then OpenTelemetry::SDK::Metrics::Instrument::ObservableUpDownCounter.new(name, unit, description, callback, @instrumentation_scope, @meter_provider)
-            end
+        # TODO: refer yard doc comments to API
+
+        def create_counter(name, unit: nil, description: nil, advice: nil)
+          register_instrument(name) do
+            SDK::Metrics::Instrument::Counter.new(
+              name,
+              unit: unit,
+              description: description,
+              advice: advice,
+              # @meter_provider # TODO: Check if we should pass meter/meter provider to Instrument
+            )
+          end
+        end
+
+        def create_histogram(name, unit: nil, description: nil, advice: nil)
+          register_instrument(name) do
+            SDK::Metrics::Instrument::Histogram.new(
+              name,
+              unit: unit,
+              description: description,
+              advice: advice,
+              # @meter_provider
+            )
+          end
+        end
+
+        def create_up_down_counter(name, unit: nil, description: nil, advice: nil)
+          register_instrument(name) do
+            SDK::Metrics::Instrument::UpDownCounter.new(
+              name,
+              unit: unit,
+              description: description,
+              advice: advice,
+              # @meter_provider
+            )
+          end
+        end
+
+        def create_observable_counter(name, unit: nil, description: nil, callbacks: nil)
+          register_instrument(name) do
+            SDK::Metrics::Instrument::ObservableCounter.new(
+              name,
+              unit: unit,
+              description: description,
+              callbacks: callbacks,
+              # @meter_provider
+            )
+          end
+        end
+
+        def create_observable_gauge(name, unit: nil, description: nil, callbacks: nil)
+          register_instrument(name) do
+            SDK::Metrics::Instrument::ObservableGauge.new(
+              name,
+              unit: unit,
+              description: description,
+              callbacks: callbacks,
+              # @meter_provider
+            )
+          end
+        end
+
+        def create_observable_up_down_counter(name, unit: nil, description: nil, callbacks: nil)
+          register_instrument(name) do
+            SDK::Metrics::Instrument::ObservableUpDownCounter.new(
+              name,
+              unit: unit,
+              description: description,
+              callbacks: callbacks,
+              # @meter_provider
+            )
           end
         end
       end
