@@ -24,7 +24,13 @@ module OpenTelemetry
         :NOOP_OBSERVABLE_UP_DOWN_COUNTER
       )
 
-      attr_reader :name, :version, :schema_url, :attributes
+      attr_reader(
+        :name,
+        :version,
+        :schema_url,
+        :attributes,
+        :instrumentation_scope
+      )
 
       # @api private
       def initialize(name, version: nil, schema_url: nil, attributes: nil)
@@ -156,6 +162,15 @@ module OpenTelemetry
       # @return [Instrument::ObservableUpDownCounter]
       def create_observable_up_down_counter(name, unit: nil, description: nil, callbacks: nil)
         register_instrument(name) { NOOP_OBSERVABLE_UP_DOWN_COUNTER }
+      end
+
+      # @api private
+      def each_instrument
+        @mutex.synchronize do
+          instrument_registry.each do |name, instrument|
+            yield(name, instrument)
+          end
+        end
       end
 
       private

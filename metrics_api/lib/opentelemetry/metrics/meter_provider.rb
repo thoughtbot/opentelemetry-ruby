@@ -20,8 +20,8 @@ module OpenTelemetry
 
         @mutex = Mutex.new
         @stopped = false
-        @meter_registry = {}
         @metric_readers = []
+        @meter_registry = {}
       end
 
       # @param [String] name

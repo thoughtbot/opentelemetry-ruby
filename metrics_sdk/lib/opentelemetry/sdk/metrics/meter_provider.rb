@@ -110,25 +110,24 @@ module OpenTelemetry
         # Adds a new MetricReader to this {MeterProvider}.
         #
         # @param metric_reader the new MetricReader to be added.
-        def add_metric_reader(metric_reader)
+        def add_metric_reader(metric_reader, aggregation: default_aggregation)
           @mutex.synchronize do
             if @stopped
               OpenTelemetry.logger.warn('calling MetricProvider#add_metric_reader after shutdown.')
             else
               @metric_readers.push(metric_reader)
-              @meter_registry.each_value { |meter| meter.add_metric_reader(metric_reader) }
+
+              @meter_registry.each_value do |meter|
+                meter.each_instrument do |_name, instrument|
+                  metric_stream = build_metric_stream(meter, instrument, aggregation)
+
+                  instrument.add_metric_stream(metric_stream)
+                  metric_reader.metric_store.add_metric_stream(metric_stream)
+                end
+              end
             end
 
             nil
-          end
-        end
-
-        # @api private
-        def register_synchronous_instrument(instrument)
-          @mutex.synchronize do
-            @metric_readers.each do |mr|
-              instrument.register_with_new_metric_store(mr.metric_store)
-            end
           end
         end
 
@@ -149,6 +148,18 @@ module OpenTelemetry
           end
 
           Key.new(name, version, schema_url)
+        end
+
+        def build_metric_stream(meter, instrument, aggregation)
+          SDK::Metrics::State::MetricStream.new(
+            instrument.name,
+            instrument.description,
+            instrument.unit,
+            instrument.kind,
+            self,
+            meter.instrumentation_scope,
+            aggregation
+          )
         end
       end
     end

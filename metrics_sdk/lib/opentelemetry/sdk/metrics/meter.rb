@@ -11,13 +11,6 @@ module OpenTelemetry
     module Metrics
       # {Meter} is the SDK implementation of {OpenTelemetry::Metrics::Meter}.
       class Meter < OpenTelemetry::Metrics::Meter
-        # @api private
-        def add_metric_reader(metric_reader)
-          @instrument_registry.each do |_n, instrument|
-            instrument.register_with_new_metric_store(metric_reader.metric_store)
-          end
-        end
-
         # TODO: refer yard doc comments to API
 
         def create_counter(name, unit: nil, description: nil, advice: nil)
