@@ -9,6 +9,9 @@ module OpenTelemetry
     module Instrument
       # No-op implementation of ObservableGauge.
       class ObservableGauge < AsynchronousInstrument
+        def kind
+          :observable_gauge
+        end
       end
     end
   end

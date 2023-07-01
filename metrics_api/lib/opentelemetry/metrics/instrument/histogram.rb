@@ -9,6 +9,10 @@ module OpenTelemetry
     module Instrument
       # No-op implementation of Histogram.
       class Histogram < SynchronousInstrument
+        def kind
+          :histogram
+        end
+
         # Updates the statistics with the specified amount.
         #
         # @param [Numeric] amount The amount of the Measurement, which MUST be a non-negative numeric value.

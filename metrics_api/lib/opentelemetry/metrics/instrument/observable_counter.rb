@@ -9,6 +9,9 @@ module OpenTelemetry
     module Instrument
       # No-op implementation of ObservableCounter.
       class ObservableCounter < AsynchronousInstrument
+        def kind
+          :observable_counter
+        end
       end
     end
   end

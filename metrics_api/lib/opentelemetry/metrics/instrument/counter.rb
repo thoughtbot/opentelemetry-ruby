@@ -9,6 +9,10 @@ module OpenTelemetry
     module Instrument
       # No-op implementation of Counter.
       class Counter < SynchronousInstrument
+        def kind
+          :counter
+        end
+
         # Increment the Counter by a fixed amount.
         #
         # @param [Numeric] increment The increment amount, which MUST be a non-negative numeric value.
