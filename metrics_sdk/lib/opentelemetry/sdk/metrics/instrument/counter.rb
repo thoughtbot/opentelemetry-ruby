@@ -10,13 +10,6 @@ module OpenTelemetry
       module Instrument
         # {Counter} is the SDK implementation of {OpenTelemetry::Metrics::Counter}.
         class Counter < OpenTelemetry::Metrics::Instrument::Counter
-          # Returns the instrument kind as a Symbol
-          #
-          # @return [Symbol]
-          def instrument_kind
-            :counter
-          end
-
           # Increment the Counter by a fixed amount.
           #
           # @param [numeric] increment The increment amount, which MUST be a non-negative numeric value.

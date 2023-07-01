@@ -10,13 +10,6 @@ module OpenTelemetry
       module Instrument
         # {Histogram} is the SDK implementation of {OpenTelemetry::Metrics::Histogram}.
         class Histogram < OpenTelemetry::Metrics::Instrument::Histogram
-          # Returns the instrument kind as a Symbol
-          #
-          # @return [Symbol]
-          def instrument_kind
-            :histogram
-          end
-
           # Updates the statistics with the specified amount.
           #
           # @param [numeric] amount The amount of the Measurement, which MUST be a non-negative numeric value.

@@ -10,15 +10,6 @@ module OpenTelemetry
       module Instrument
         # {ObservableCounter} is the SDK implementation of {OpenTelemetry::Metrics::ObservableCounter}.
         class ObservableCounter < OpenTelemetry::Metrics::Instrument::ObservableCounter
-          attr_reader :name, :unit, :description
-
-          def initialize(name, unit, description, callback, meter)
-            @name = name
-            @unit = unit
-            @description = description
-            @callback = callback
-            @meter = meter
-          end
         end
       end
     end

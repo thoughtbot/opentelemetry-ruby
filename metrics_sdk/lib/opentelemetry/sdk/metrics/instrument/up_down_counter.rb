@@ -10,13 +10,6 @@ module OpenTelemetry
       module Instrument
         # {UpDownCounter} is the SDK implementation of {OpenTelemetry::Metrics::UpDownCounter}.
         class UpDownCounter < OpenTelemetry::Metrics::Instrument::UpDownCounter
-          # Returns the instrument kind as a Symbol
-          #
-          # @return [Symbol]
-          def instrument_kind
-            :up_down_counter
-          end
-
           # Increment or decrement the UpDownCounter by a fixed amount.
           #
           # @param [Numeric] amount The amount to be added, can be positive, negative or zero.
