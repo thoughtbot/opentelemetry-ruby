@@ -31,12 +31,6 @@ module OpenTelemetry
             OpenTelemetry.handle_error(exception: e)
             nil
           end
-
-          private
-
-          def default_aggregation
-            OpenTelemetry::SDK::Metrics::Aggregation::ExplicitBucketHistogram.new
-          end
         end
       end
     end
