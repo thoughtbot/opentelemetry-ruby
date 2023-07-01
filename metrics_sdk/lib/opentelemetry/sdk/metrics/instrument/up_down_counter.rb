@@ -9,7 +9,7 @@ module OpenTelemetry
     module Metrics
       module Instrument
         # {UpDownCounter} is the SDK implementation of {OpenTelemetry::Metrics::UpDownCounter}.
-        class UpDownCounter < OpenTelemetry::SDK::Metrics::Instrument::SynchronousInstrument
+        class UpDownCounter < OpenTelemetry::Metrics::Instrument::UpDownCounter
           # Returns the instrument kind as a Symbol
           #
           # @return [Symbol]

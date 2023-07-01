@@ -9,7 +9,7 @@ module OpenTelemetry
     module Metrics
       module Instrument
         # {Histogram} is the SDK implementation of {OpenTelemetry::Metrics::Histogram}.
-        class Histogram < OpenTelemetry::SDK::Metrics::Instrument::SynchronousInstrument
+        class Histogram < OpenTelemetry::Metrics::Instrument::Histogram
           # Returns the instrument kind as a Symbol
           #
           # @return [Symbol]

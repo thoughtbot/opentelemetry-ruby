@@ -9,7 +9,7 @@ module OpenTelemetry
     module Metrics
       module Instrument
         # {Counter} is the SDK implementation of {OpenTelemetry::Metrics::Counter}.
-        class Counter < OpenTelemetry::SDK::Metrics::Instrument::SynchronousInstrument
+        class Counter < OpenTelemetry::Metrics::Instrument::Counter
           # Returns the instrument kind as a Symbol
           #
           # @return [Symbol]
