@@ -37,8 +37,7 @@ module OpenTelemetry
               name,
               version: version,
               schema_url: schema_url,
-              attributes: attributes,
-              # TODO: Check if we should pass self to Meter.new
+              attributes: attributes
             )
 
             @mutex.synchronize do

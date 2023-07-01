@@ -19,8 +19,7 @@ module OpenTelemetry
               name,
               unit: unit,
               description: description,
-              advice: advice,
-              # @meter_provider # TODO: Check if we should pass meter/meter provider to Instrument
+              advice: advice
             )
           end
         end
@@ -31,8 +30,7 @@ module OpenTelemetry
               name,
               unit: unit,
               description: description,
-              advice: advice,
-              # @meter_provider
+              advice: advice
             )
           end
         end
@@ -43,8 +41,7 @@ module OpenTelemetry
               name,
               unit: unit,
               description: description,
-              advice: advice,
-              # @meter_provider
+              advice: advice
             )
           end
         end
@@ -55,8 +52,7 @@ module OpenTelemetry
               name,
               unit: unit,
               description: description,
-              callbacks: callbacks,
-              # @meter_provider
+              callbacks: callbacks
             )
           end
         end
@@ -67,8 +63,7 @@ module OpenTelemetry
               name,
               unit: unit,
               description: description,
-              callbacks: callbacks,
-              # @meter_provider
+              callbacks: callbacks
             )
           end
         end
@@ -79,8 +74,7 @@ module OpenTelemetry
               name,
               unit: unit,
               description: description,
-              callbacks: callbacks,
-              # @meter_provider
+              callbacks: callbacks
             )
           end
         end
