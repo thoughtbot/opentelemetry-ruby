@@ -27,20 +27,20 @@ module OpenTelemetry
         #
         # @return [SDK::Metrics::Meter]
         def meter(name, version: nil, schema_url: nil, attributes: nil)
-          if @stopped
-            OpenTelemetry.logger.warn 'calling MeterProvider#meter after shutdown, a noop meter will be returned.'
+          @mutex.synchronize do
+            if @stopped
+              OpenTelemetry.logger.warn 'calling MeterProvider#meter after shutdown, a noop meter will be returned.'
 
-            NOOP_METER
-          else
-            key = build_key_for_meter(name, version, schema_url)
-            meter = Meter.new(
-              name,
-              version: version,
-              schema_url: schema_url,
-              attributes: attributes
-            )
+              NOOP_METER
+            else
+              key = build_key_for_meter(name, version, schema_url)
+              meter = Meter.new(
+                name,
+                version: version,
+                schema_url: schema_url,
+                attributes: attributes
+              )
 
-            @mutex.synchronize do
               @meter_registry[key] ||= meter
             end
           end
@@ -118,7 +118,11 @@ module OpenTelemetry
 
               @meter_registry.each_value do |meter|
                 meter.each_instrument do |_name, instrument|
-                  metric_stream = build_metric_stream(meter, instrument, aggregation)
+                  metric_stream = build_metric_stream(
+                    meter,
+                    instrument,
+                    aggregation || build_default_aggregation_for(instrument)
+                  )
 
                   instrument.add_metric_stream(metric_stream)
                   metric_reader.metric_store.add_metric_stream(metric_stream)
@@ -157,9 +161,9 @@ module OpenTelemetry
             instrument.description,
             instrument.unit,
             instrument.kind,
-            self,
+            @resource,
             meter.instrumentation_scope,
-            aggregation || build_default_aggregation_for(instrument)
+            aggregation
           )
         end
 

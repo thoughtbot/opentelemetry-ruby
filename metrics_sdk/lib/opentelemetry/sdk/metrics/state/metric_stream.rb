@@ -13,14 +13,22 @@ module OpenTelemetry
         # The MetricStream class provides SDK internal functionality that is not a part of the
         # public API.
         class MetricStream
-          attr_reader :name, :description, :unit, :instrument_kind, :instrumentation_scope, :data_points
+          attr_reader(
+            :name,
+            :description,
+            :unit,
+            :instrument_kind,
+            :resource,
+            :instrumentation_scope,
+            :data_points # ??
+          )
 
           def initialize(
             name,
             description,
             unit,
-            instrument_kind,
-            meter_provider,
+            instrument_kind, # TODO: remove and replace with data_point_type??
+            resource,
             instrumentation_scope,
             aggregation
           )
@@ -28,10 +36,11 @@ module OpenTelemetry
             @description = description
             @unit = unit
             @instrument_kind = instrument_kind
-            @meter_provider = meter_provider
+            @resource = resource
             @instrumentation_scope = instrumentation_scope
             @aggregation = aggregation
 
+            @data_points = [] # ??
             @mutex = Mutex.new
           end
 
@@ -41,8 +50,8 @@ module OpenTelemetry
                 @name,
                 @description,
                 @unit,
-                @instrument_kind,
-                @meter_provider.resource,
+                @instrument_kind, # TODO: remove and replace with data_point_type??
+                @resource,
                 @instrumentation_scope,
                 @aggregation.collect(start_time, end_time),
                 start_time,

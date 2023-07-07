@@ -11,8 +11,10 @@ module OpenTelemetry
         # Contains the implementation of the Sum aggregation
         # https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/sdk.md#sum-aggregation
         class Sum
-          def initialize(aggregation_temporality: :delta)
+          def initialize(aggregation_temporality: :delta, monotonic: true)
             @aggregation_temporality = aggregation_temporality
+            @monotonic = monotonic
+
             @data_points = {}
           end
 
@@ -36,16 +38,21 @@ module OpenTelemetry
           end
 
           def update(increment, attributes)
-            ndp = @data_points[attributes] || @data_points[attributes] = NumberDataPoint.new(
+            @data_points[attributes] ||= build_data_point(attributes)
+            @data_points[attributes].value += increment
+            nil
+          end
+
+          private
+
+          def build_data_point(attributes)
+            NumberDataPoint.new(
               attributes,
               nil,
               nil,
               0,
               nil
             )
-
-            ndp.value += increment
-            nil
           end
         end
       end

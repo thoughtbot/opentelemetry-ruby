@@ -9,15 +9,17 @@ module OpenTelemetry
     module Metrics
       module State
         # MetricData is a Struct containing {MetricStream} data for export.
-        MetricData = Struct.new(:name,                      # String
-                                :description,               # String
-                                :unit,                      # String
-                                :instrument_kind,           # Symbol
-                                :resource,                  # OpenTelemetry::SDK::Resources::Resource
-                                :instrumentation_scope,     # OpenTelemetry::SDK::InstrumentationScope
-                                :data_points,               # Hash{Hash{String => String, Numeric, Boolean, Array<String, Numeric, Boolean>} => Numeric}
-                                :start_time_unix_nano,      # Integer nanoseconds since Epoch
-                                :time_unix_nano)            # Integer nanoseconds since Epoch
+        MetricData = Struct.new(
+          :name,                  # String
+          :description,           # String
+          :unit,                  # String
+          :instrument_kind,       # Symbol
+          :resource,              # OpenTelemetry::SDK::Resources::Resource
+          :instrumentation_scope, # OpenTelemetry::SDK::InstrumentationScope
+          :data_points,           # Hash{Hash{String => String, Numeric, Boolean, Array<String, Numeric, Boolean>} => Numeric}
+          :start_time_unix_nano,  # Integer nanoseconds since Epoch
+          :time_unix_nano         # Integer nanoseconds since Epoch
+        )
       end
     end
   end

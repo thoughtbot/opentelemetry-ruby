@@ -14,17 +14,21 @@ module OpenTelemetry
         # public API.
         class MetricStore
           def initialize
-            @mutex = Mutex.new
             @epoch_start_time = now_in_nano
             @epoch_end_time = nil
+
+            @mutex = Mutex.new
             @metric_streams = []
           end
 
           def collect
             @mutex.synchronize do
               @epoch_end_time = now_in_nano
-              snapshot = @metric_streams.map { |ms| ms.collect(@epoch_start_time, @epoch_end_time) }
+              snapshot = @metric_streams.map do |metric_stream|
+                metric_stream.collect(@epoch_start_time, @epoch_end_time)
+              end
               @epoch_start_time = @epoch_end_time
+
               snapshot
             end
           end
