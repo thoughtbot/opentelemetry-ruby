@@ -18,7 +18,7 @@ module OpenTelemetry
           @description = description || ''
           @advice = advice || {}
 
-          @mutex = Mutex.enw
+          @mutex = Mutex.new
           @metric_streams = []
         end
 

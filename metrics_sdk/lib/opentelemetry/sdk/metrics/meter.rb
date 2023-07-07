@@ -13,6 +13,17 @@ module OpenTelemetry
       class Meter < OpenTelemetry::Metrics::Meter
         # TODO: refer yard doc comments to API
 
+        def initialize(*args, **kwargs)
+          super
+
+          @instrumentation_scope = InstrumentationScope.new(
+            @name,
+            @version,
+            @schema_url,
+            @attributes
+          )
+        end
+
         def create_counter(name, unit: nil, description: nil, advice: nil)
           register_instrument(name) do
             SDK::Metrics::Instrument::Counter.new(
