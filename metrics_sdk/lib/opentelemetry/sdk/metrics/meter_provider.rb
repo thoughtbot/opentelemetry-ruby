@@ -159,7 +159,7 @@ module OpenTelemetry
             instrument.kind,
             self,
             meter.instrumentation_scope,
-            aggregation
+            aggregation || build_default_aggregation_for(instrument)
           )
         end
 

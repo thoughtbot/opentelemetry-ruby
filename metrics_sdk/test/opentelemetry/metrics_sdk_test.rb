@@ -18,7 +18,7 @@ describe OpenTelemetry::SDK do
       # Calls before the SDK is configured return Proxy implementations
       _(meter_provider).must_be_instance_of OpenTelemetry::Internal::ProxyMeterProvider
       _(meter).must_be_instance_of OpenTelemetry::Internal::ProxyMeter
-      _(instrument).must_be_instance_of OpenTelemetry::Internal::ProxyInstrument
+      _(instrument).must_be_instance_of OpenTelemetry::Internal::ProxyInstrument::Counter
 
       OpenTelemetry::SDK.configure
 

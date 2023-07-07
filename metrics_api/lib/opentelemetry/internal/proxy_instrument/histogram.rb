@@ -12,10 +12,12 @@ module OpenTelemetry
         include DelegateSynchronousInstrument
 
         def record(amount, attributes: nil)
-          if @delegate.nil?
-            super
-          else
-            @delegate.record(amount, attributes: attributes)
+          @delegate_mutex.synchronize do
+            if @delegate.nil?
+              super
+            else
+              @delegate.record(amount, attributes: attributes)
+            end
           end
         end
       end

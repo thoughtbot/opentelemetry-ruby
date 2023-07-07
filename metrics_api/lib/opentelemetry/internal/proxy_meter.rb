@@ -16,6 +16,7 @@ module OpenTelemetry
       def initialize(*args, **kwargs)
         super
 
+        @delegate_mutex = Mutex.new
         @delegate = nil
       end
 
@@ -24,7 +25,7 @@ module OpenTelemetry
       #
       # @param [Meter] meter The Meter to delegate to
       def delegate=(meter)
-        @mutex.synchronize do
+        @delegate_mutex.synchronize do
           if @delegate.nil?
             @delegate = meter
 
@@ -83,7 +84,7 @@ module OpenTelemetry
 
       def create_counter(name, unit: nil, description: nil, advice: nil)
         register_instrument(name) do
-          @mutex.synchronize do
+          @delegate_mutex.synchronize do
             if @delegate.nil?
               ProxyInstrument::Counter.new(
                 name,
@@ -105,7 +106,7 @@ module OpenTelemetry
 
       def create_histogram(name, unit: nil, description: nil, advice: nil)
         register_instrument(name) do
-          @mutex.synchronize do
+          @delegate_mutex.synchronize do
             if @delegate.nil?
               ProxyInstrument::Histogram.new(
                 name,
@@ -127,7 +128,7 @@ module OpenTelemetry
 
       def create_up_down_counter(name, unit: nil, description: nil, advice: nil)
         register_instrument(name) do
-          @mutex.synchronize do
+          @delegate_mutex.synchronize do
             if @delegate.nil?
               ProxyInstrument::UpDownCounter.new(
                 name,
@@ -149,7 +150,7 @@ module OpenTelemetry
 
       def create_observable_counter(name, unit: nil, description: nil, callbacks: nil)
         register_instrument(name) do
-          @mutex.synchronize do
+          @delegate_mutex.synchronize do
             if @delegate.nil?
               ProxyInstrument::ObservableCounter.new(
                 name,
@@ -171,7 +172,7 @@ module OpenTelemetry
 
       def create_observable_gauge(name, unit: nil, description: nil, callbacks: nil)
         register_instrument(name) do
-          @mutex.synchronize do
+          @delegate_mutex.synchronize do
             if @delegate.nil?
               ProxyInstrument::ObservableGauge.new(
                 name,
@@ -193,7 +194,7 @@ module OpenTelemetry
 
       def create_observable_up_down_counter(name, unit: nil, description: nil, callbacks: nil)
         register_instrument(name) do
-          @mutex.synchronize do
+          @delegate_mutex.synchronize do
             if @delegate.nil?
               ProxyInstrument::ObservableUpDownCounter.new(
                 name,

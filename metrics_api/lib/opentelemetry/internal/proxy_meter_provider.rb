@@ -16,6 +16,7 @@ module OpenTelemetry
       def initialize(*args, **kwargs)
         super
 
+        @delegate_mutex = Mutex.new
         @delegate = nil
       end
 
@@ -24,7 +25,7 @@ module OpenTelemetry
       #
       # @param [MeterProvider] meter_provider The Meter provider to delegate to
       def delegate=(meter_provider)
-        @mutex.synchronize do
+        @delegate_mutex.synchronize do
           if @delegate.nil?
             @delegate = meter_provider
 
@@ -44,7 +45,7 @@ module OpenTelemetry
 
       # @api private
       def meter(name, version: nil, schema_url: nil, attributes: nil)
-        @mutex.synchronize do
+        @delegate_mutex.synchronize do
           if @delegate.nil?
             proxy_meter = ProxyMeter.new(
               name,

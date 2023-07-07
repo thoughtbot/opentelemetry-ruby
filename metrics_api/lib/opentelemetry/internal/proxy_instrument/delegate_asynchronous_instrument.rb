@@ -12,12 +12,12 @@ module OpenTelemetry
         def initialize(*args, **kwargs)
           super
 
-          @mutex = Mutex.new
+          @delegate_mutex = Mutex.new
           @delegate = nil
         end
 
         def delegate=(instrument)
-          @mutex.synchronize do
+          @delegate_mutex.synchronize do
             if @delegate.nil?
               @delegate = instrument
             else
@@ -29,18 +29,22 @@ module OpenTelemetry
         end
 
         def register_callbacks(*callbacks)
-          if @delegate.nil?
-            super
-          else
-            @delegate.register_callbacks(*callbacks)
+          @delegate_mutex.synchronize do
+            if @delegate.nil?
+              super
+            else
+              @delegate.register_callbacks(*callbacks)
+            end
           end
         end
 
         def unregister_callbacks(*callbacks)
-          if @delegate.nil?
-            super
-          else
-            @delegate.unregister_callbacks(*callbacks)
+          @delegate_mutex.synchronize do
+            if @delegate.nil?
+              super
+            else
+              @delegate.unregister_callbacks(*callbacks)
+            end
           end
         end
       end

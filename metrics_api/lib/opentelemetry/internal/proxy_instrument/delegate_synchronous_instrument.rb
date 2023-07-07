@@ -12,12 +12,12 @@ module OpenTelemetry
         def initialize(*args, **kwargs)
           super
 
-          @mutex = Mutex.new
+          @delegate_mutex = Mutex.new
           @delegate = nil
         end
 
         def delegate=(instrument)
-          @mutex.synchronize do
+          @delegate_mutex.synchronize do
             if @delegate.nil?
               @delegate = instrument
             else
