@@ -163,6 +163,7 @@ module OpenTelemetry
           )
         end
 
+        # https://opentelemetry.io/docs/specs/otel/metrics/sdk/#default-aggregation
         def build_default_aggregation_for(instrument)
           case instrument
           when Counter
