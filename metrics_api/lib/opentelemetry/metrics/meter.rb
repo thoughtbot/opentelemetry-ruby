@@ -33,11 +33,13 @@ module OpenTelemetry
       )
 
       # @api private
-      def initialize(name, version: nil, schema_url: nil, attributes: nil)
+      def initialize(name, version: nil, schema_url: nil, attributes: nil, meter_provider: nil)
         @name = name
         @version = version || ''
         @schema_url = schema_url || ''
         @attributes = attributes || {}
+
+        @meter_provider = meter_provider
 
         @mutex = Mutex.new
         @instrument_registry = {}

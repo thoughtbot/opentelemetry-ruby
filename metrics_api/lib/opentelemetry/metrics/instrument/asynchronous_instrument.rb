@@ -12,11 +12,13 @@ module OpenTelemetry
         attr_reader :name, :unit, :description, :callbacks
 
         # @api private
-        def initialize(name, unit: nil, description: nil, callbacks: nil)
+        def initialize(name, unit: nil, description: nil, callbacks: nil, meter: nil)
           @name = name
           @unit = unit || ''
           @description = description || ''
           @callbacks = callbacks ? Array(callbacks) : []
+
+          @meter = meter
         end
 
         # @param callbacks [Proc, Array<Proc>]

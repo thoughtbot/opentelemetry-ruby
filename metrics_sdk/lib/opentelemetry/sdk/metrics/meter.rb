@@ -30,7 +30,8 @@ module OpenTelemetry
               name,
               unit: unit,
               description: description,
-              advice: advice
+              advice: advice,
+              meter_provider: self
             )
           end
         end
@@ -41,7 +42,8 @@ module OpenTelemetry
               name,
               unit: unit,
               description: description,
-              advice: advice
+              advice: advice,
+              meter_provider: self
             )
           end
         end
@@ -52,7 +54,8 @@ module OpenTelemetry
               name,
               unit: unit,
               description: description,
-              advice: advice
+              advice: advice,
+              meter_provider: self
             )
           end
         end
@@ -63,7 +66,8 @@ module OpenTelemetry
               name,
               unit: unit,
               description: description,
-              callbacks: callbacks
+              callbacks: callbacks,
+              meter_provider: self
             )
           end
         end
@@ -74,7 +78,8 @@ module OpenTelemetry
               name,
               unit: unit,
               description: description,
-              callbacks: callbacks
+              callbacks: callbacks,
+              meter_provider: self
             )
           end
         end
@@ -85,7 +90,8 @@ module OpenTelemetry
               name,
               unit: unit,
               description: description,
-              callbacks: callbacks
+              callbacks: callbacks,
+              meter_provider: self
             )
           end
         end

@@ -40,6 +40,7 @@ module OpenTelemetry
                 version: version,
                 schema_url: schema_url,
                 attributes: attributes
+                meter_provider: self
               )
             end
           end
