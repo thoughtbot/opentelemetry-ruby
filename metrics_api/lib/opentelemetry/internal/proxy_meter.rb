@@ -83,135 +83,135 @@ module OpenTelemetry
       end
 
       def create_counter(name, unit: nil, description: nil, advice: nil)
-        register_instrument(name) do
-          @delegate_mutex.synchronize do
-            if @delegate.nil?
-              ProxyInstrument::Counter.new(
-                name,
-                unit: unit,
-                description: description,
-                advice: advice
-              )
-            else
-              @delegate.create_counter(
-                name,
-                unit: unit,
-                description: description,
-                advice: advice
-              )
-            end
+        instrument = @delegate_mutex.synchronize do
+          if @delegate.nil?
+            ProxyInstrument::Counter.new(
+              name,
+              unit: unit,
+              description: description,
+              advice: advice
+            )
+          else
+            @delegate.create_counter(
+              name,
+              unit: unit,
+              description: description,
+              advice: advice
+            )
           end
         end
+
+        register_instrument(name, instrument)
       end
 
       def create_histogram(name, unit: nil, description: nil, advice: nil)
-        register_instrument(name) do
-          @delegate_mutex.synchronize do
-            if @delegate.nil?
-              ProxyInstrument::Histogram.new(
-                name,
-                unit: unit,
-                description: description,
-                advice: advice
-              )
-            else
-              @delegate.create_histogram(
-                name,
-                unit: unit,
-                description: description,
-                advice: advice
-              )
-            end
+        instrument = @delegate_mutex.synchronize do
+          if @delegate.nil?
+            ProxyInstrument::Histogram.new(
+              name,
+              unit: unit,
+              description: description,
+              advice: advice
+            )
+          else
+            @delegate.create_histogram(
+              name,
+              unit: unit,
+              description: description,
+              advice: advice
+            )
           end
         end
+
+        register_instrument(name, instrument)
       end
 
       def create_up_down_counter(name, unit: nil, description: nil, advice: nil)
-        register_instrument(name) do
-          @delegate_mutex.synchronize do
-            if @delegate.nil?
-              ProxyInstrument::UpDownCounter.new(
-                name,
-                unit: unit,
-                description: description,
-                advice: advice
-              )
-            else
-              @delegate.create_up_down_counter(
-                name,
-                unit: unit,
-                description: description,
-                advice: advice
-              )
-            end
+        instrument = @delegate_mutex.synchronize do
+          if @delegate.nil?
+            ProxyInstrument::UpDownCounter.new(
+              name,
+              unit: unit,
+              description: description,
+              advice: advice
+            )
+          else
+            @delegate.create_up_down_counter(
+              name,
+              unit: unit,
+              description: description,
+              advice: advice
+            )
           end
         end
+
+        register_instrument(name, instrument)
       end
 
       def create_observable_counter(name, unit: nil, description: nil, callbacks: nil)
-        register_instrument(name) do
-          @delegate_mutex.synchronize do
-            if @delegate.nil?
-              ProxyInstrument::ObservableCounter.new(
-                name,
-                unit: unit,
-                description: description,
-                callbacks: callbacks
-              )
-            else
-              @delegate.create_observable_counter(
-                name,
-                unit: unit,
-                description: description,
-                callbacks: callbacks
-              )
-            end
+        instrument = @delegate_mutex.synchronize do
+          if @delegate.nil?
+            ProxyInstrument::ObservableCounter.new(
+              name,
+              unit: unit,
+              description: description,
+              callbacks: callbacks
+            )
+          else
+            @delegate.create_observable_counter(
+              name,
+              unit: unit,
+              description: description,
+              callbacks: callbacks
+            )
           end
         end
+
+        register_instrument(name, instrument)
       end
 
       def create_observable_gauge(name, unit: nil, description: nil, callbacks: nil)
-        register_instrument(name) do
-          @delegate_mutex.synchronize do
-            if @delegate.nil?
-              ProxyInstrument::ObservableGauge.new(
-                name,
-                unit: unit,
-                description: description,
-                callbacks: callbacks
-              )
-            else
-              @delegate.create_observable_gauge(
-                name,
-                unit: unit,
-                description: description,
-                callbacks: callbacks
-              )
-            end
+        instrument = @delegate_mutex.synchronize do
+          if @delegate.nil?
+            ProxyInstrument::ObservableGauge.new(
+              name,
+              unit: unit,
+              description: description,
+              callbacks: callbacks
+            )
+          else
+            @delegate.create_observable_gauge(
+              name,
+              unit: unit,
+              description: description,
+              callbacks: callbacks
+            )
           end
         end
+
+        register_instrument(name, instrument)
       end
 
       def create_observable_up_down_counter(name, unit: nil, description: nil, callbacks: nil)
-        register_instrument(name) do
-          @delegate_mutex.synchronize do
-            if @delegate.nil?
-              ProxyInstrument::ObservableUpDownCounter.new(
-                name,
-                unit: unit,
-                description: description,
-                callbacks: callbacks
-              )
-            else
-              @delegate.create_observable_up_down_counter(
-                name,
-                unit: unit,
-                description: description,
-                callbacks: callbacks
-              )
-            end
+        instrument = @delegate_mutex.synchronize do
+          if @delegate.nil?
+            ProxyInstrument::ObservableUpDownCounter.new(
+              name,
+              unit: unit,
+              description: description,
+              callbacks: callbacks
+            )
+          else
+            @delegate.create_observable_up_down_counter(
+              name,
+              unit: unit,
+              description: description,
+              callbacks: callbacks
+            )
           end
         end
+
+        register_instrument(name, instrument)
       end
     end
   end

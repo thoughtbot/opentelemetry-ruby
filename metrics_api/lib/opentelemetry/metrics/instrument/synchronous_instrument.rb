@@ -24,6 +24,13 @@ module OpenTelemetry
           @metric_streams = []
         end
 
+        # @api private
+        def add_metric_stream(metric_stream)
+          @mutex.synchronize do
+            @metric_streams.push(metric_stream)
+          end
+        end
+
         private
 
         def update(value, attributes)

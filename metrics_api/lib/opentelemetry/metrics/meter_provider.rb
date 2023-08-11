@@ -38,6 +38,15 @@ module OpenTelemetry
       def meter(name, version: nil, schema_url: nil, attributes: nil)
         NOOP_METER
       end
+
+      # @api private
+      def each_metric_reader
+        @mutex.synchronize do
+          @metric_readers.each do |metric_reader|
+            yield(metric_reader)
+          end
+        end
+      end
     end
   end
 end

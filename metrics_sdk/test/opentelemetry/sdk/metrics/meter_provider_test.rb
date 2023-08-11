@@ -128,19 +128,19 @@ describe OpenTelemetry::SDK::Metrics::MeterProvider do
       _(metric_reader_b.metric_store.instance_variable_get(:@metric_streams).size).must_equal(1)
     end
 
-    # it 'associates the metric store with instruments created after the metric reader' do
-    #   metric_reader_a = build_metric_reader
-    #   OpenTelemetry.meter_provider.add_metric_reader(metric_reader_a)
+    it 'associates the metric store with instruments created after the metric reader' do
+      metric_reader_a = build_metric_reader
+      OpenTelemetry.meter_provider.add_metric_reader(metric_reader_a)
 
-    #   metric_reader_b = build_metric_reader
-    #   OpenTelemetry.meter_provider.add_metric_reader(metric_reader_b)
+      metric_reader_b = build_metric_reader
+      OpenTelemetry.meter_provider.add_metric_reader(metric_reader_b)
 
-    #   instrument = OpenTelemetry.meter_provider.meter('test-meter').create_counter('test-instrument')
+      instrument = OpenTelemetry.meter_provider.meter('test-meter').create_counter('test-instrument')
 
-    #   _(instrument.instance_variable_get(:@metric_streams).size).must_equal(2)
-    #   _(metric_reader_a.metric_store.instance_variable_get(:@metric_streams).size).must_equal(1)
-    #   _(metric_reader_b.metric_store.instance_variable_get(:@metric_streams).size).must_equal(1)
-    # end
+      _(instrument.instance_variable_get(:@metric_streams).size).must_equal(2)
+      _(metric_reader_a.metric_store.instance_variable_get(:@metric_streams).size).must_equal(1)
+      _(metric_reader_b.metric_store.instance_variable_get(:@metric_streams).size).must_equal(1)
+    end
   end
 
   # # TODO: OpenTelemetry.meter_provider.add_view

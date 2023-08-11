@@ -39,7 +39,7 @@ module OpenTelemetry
                 name,
                 version: version,
                 schema_url: schema_url,
-                attributes: attributes
+                attributes: attributes,
                 meter_provider: self
               )
             end
@@ -117,16 +117,7 @@ module OpenTelemetry
               @metric_readers.push(metric_reader)
 
               @meter_registry.each_value do |meter|
-                meter.each_instrument do |_name, instrument|
-                  metric_stream = build_metric_stream(
-                    meter,
-                    instrument,
-                    aggregation || build_default_aggregation_for(instrument)
-                  )
-
-                  instrument.add_metric_stream(metric_stream)
-                  metric_reader.metric_store.add_metric_stream(metric_stream)
-                end
+                meter.register_metric_store(metric_reader.metric_store, aggregation: aggregation)
               end
             end
 
@@ -151,38 +142,6 @@ module OpenTelemetry
           end
 
           Key.new(name, version, schema_url)
-        end
-
-        def build_metric_stream(meter, instrument, aggregation)
-          aggregation ||= default_aggregation_for(instrument)
-
-          SDK::Metrics::State::MetricStream.new(
-            instrument.name,
-            instrument.description,
-            instrument.unit,
-            instrument.kind,
-            @resource,
-            meter.instrumentation_scope,
-            aggregation
-          )
-        end
-
-        # https://opentelemetry.io/docs/specs/otel/metrics/sdk/#default-aggregation
-        def build_default_aggregation_for(instrument)
-          case instrument
-          when Instrument::Counter
-            Aggregation::Sum.new
-          when Instrument::Histogram
-            Aggregation::ExplicitBucketHistogram.new
-          when Instrument::UpDownCounter
-            Aggregation::Sum.new
-          when Instrument::ObservableCounter
-            # TODO: ?
-          when Instrument::ObservableGauge
-            # TODO: ?
-          when Instrument::ObservableUpDownCounter
-            # TODO: ?
-          end
         end
       end
     end
