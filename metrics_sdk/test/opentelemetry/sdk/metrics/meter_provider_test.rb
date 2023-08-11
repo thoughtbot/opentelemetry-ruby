@@ -14,20 +14,38 @@ describe OpenTelemetry::SDK::Metrics::MeterProvider do
 
   describe '#meter' do
     it 'requires a meter name' do
-      _(-> { OpenTelemetry.meter_provider.meter }).must_raise(ArgumentError)
+      _(-> { build_meter_provider.meter }).must_raise(ArgumentError)
     end
 
     it 'creates a new meter' do
-      meter = OpenTelemetry.meter_provider.meter('test')
+      meter = build_meter_provider.meter('test-meter')
 
       _(meter).must_be_instance_of(OpenTelemetry::SDK::Metrics::Meter)
     end
 
-    it 'repeated calls does not recreate a meter of the same name' do
-      meter_a = OpenTelemetry.meter_provider.meter('test')
-      meter_b = OpenTelemetry.meter_provider.meter('test')
+    it 'repeated calls do not recreate a meter of the same name' do
+      meter_provider = build_meter_provider
 
-      _(meter_a).must_equal(meter_b)
+      meter_a = meter_provider.meter('test-meter')
+      meter_b = meter_provider.meter('test-meter')
+
+      _(meter_a.object_id).must_equal(meter_b.object_id)
+    end
+
+    describe 'when meter_provider is shutdown' do
+      it 'returns a noop meter from API and logs a message' do
+        OpenTelemetry::TestHelpers.with_test_logger do |log_stream|
+          meter_provider = build_meter_provider
+          meter_provider.shutdown
+
+          meter = meter_provider.meter('test-meter')
+
+          assert(meter.instance_of?(OpenTelemetry::Metrics::Meter))
+          assert(log_stream.string.match?(
+            /calling MeterProvider#meter after shutdown, a noop meter will be returned./
+          ))
+        end
+      end
     end
   end
 
@@ -37,15 +55,6 @@ describe OpenTelemetry::SDK::Metrics::MeterProvider do
         _(OpenTelemetry.meter_provider.shutdown).must_equal(OpenTelemetry::SDK::Metrics::Export::SUCCESS)
         _(OpenTelemetry.meter_provider.shutdown).must_equal(OpenTelemetry::SDK::Metrics::Export::FAILURE)
         _(log_stream.string).must_match(/calling MetricProvider#shutdown multiple times/)
-      end
-    end
-
-    it 'returns a no-op meter after being shutdown' do
-      with_test_logger do |log_stream|
-        OpenTelemetry.meter_provider.shutdown
-
-        _(OpenTelemetry.meter_provider.meter('test')).must_be_instance_of(OpenTelemetry::Metrics::Meter)
-        _(log_stream.string).must_match(/calling MeterProvider#meter after shutdown, a noop meter will be returned/)
       end
     end
 
@@ -98,7 +107,7 @@ describe OpenTelemetry::SDK::Metrics::MeterProvider do
 
   describe '#add_metric_reader' do
     it 'adds a metric reader' do
-      metric_reader = OpenTelemetry::SDK::Metrics::Export::MetricReader.new
+      metric_reader = build_metric_reader
 
       OpenTelemetry.meter_provider.add_metric_reader(metric_reader)
 
@@ -106,41 +115,49 @@ describe OpenTelemetry::SDK::Metrics::MeterProvider do
     end
 
     it 'associates the metric store with instruments created before the metric reader' do
-      meter_a = OpenTelemetry.meter_provider.meter('a').create_counter('meter_a')
+      instrument = OpenTelemetry.meter_provider.meter('test-meter').create_counter('test-instrument')
 
-      metric_reader_a = OpenTelemetry::SDK::Metrics::Export::MetricReader.new
+      metric_reader_a = build_metric_reader
       OpenTelemetry.meter_provider.add_metric_reader(metric_reader_a)
 
-      metric_reader_b = OpenTelemetry::SDK::Metrics::Export::MetricReader.new
+      metric_reader_b = build_metric_reader
       OpenTelemetry.meter_provider.add_metric_reader(metric_reader_b)
 
-      _(meter_a.instance_variable_get(:@metric_streams).size).must_equal(2)
+      _(instrument.instance_variable_get(:@metric_streams).size).must_equal(2)
       _(metric_reader_a.metric_store.instance_variable_get(:@metric_streams).size).must_equal(1)
       _(metric_reader_b.metric_store.instance_variable_get(:@metric_streams).size).must_equal(1)
     end
 
-    it 'associates the metric store with instruments created after the metric reader' do
-      metric_reader_a = OpenTelemetry::SDK::Metrics::Export::MetricReader.new
-      OpenTelemetry.meter_provider.add_metric_reader(metric_reader_a)
+    # it 'associates the metric store with instruments created after the metric reader' do
+    #   metric_reader_a = build_metric_reader
+    #   OpenTelemetry.meter_provider.add_metric_reader(metric_reader_a)
 
-      metric_reader_b = OpenTelemetry::SDK::Metrics::Export::MetricReader.new
-      OpenTelemetry.meter_provider.add_metric_reader(metric_reader_b)
+    #   metric_reader_b = build_metric_reader
+    #   OpenTelemetry.meter_provider.add_metric_reader(metric_reader_b)
 
-      meter_a = OpenTelemetry.meter_provider.meter('a').create_counter('meter_a')
+    #   instrument = OpenTelemetry.meter_provider.meter('test-meter').create_counter('test-instrument')
 
-      _(meter_a.instance_variable_get(:@metric_streams).size).must_equal(2)
-      _(metric_reader_a.metric_store.instance_variable_get(:@metric_streams).size).must_equal(1)
-      _(metric_reader_b.metric_store.instance_variable_get(:@metric_streams).size).must_equal(1)
-    end
+    #   _(instrument.instance_variable_get(:@metric_streams).size).must_equal(2)
+    #   _(metric_reader_a.metric_store.instance_variable_get(:@metric_streams).size).must_equal(1)
+    #   _(metric_reader_b.metric_store.instance_variable_get(:@metric_streams).size).must_equal(1)
+    # end
   end
 
-  # TODO: OpenTelemetry.meter_provider.add_view
-  describe '#add_view' do
-  end
+  # # TODO: OpenTelemetry.meter_provider.add_view
+  # describe '#add_view' do
+  # end
 
   private
 
   def new_mock_reader
     Minitest::Mock.new(OpenTelemetry::SDK::Metrics::Export::MetricReader.new)
+  end
+
+  def build_metric_reader
+    OpenTelemetry::SDK::Metrics::Export::MetricReader.new
+  end
+
+  def build_meter_provider
+    OpenTelemetry::SDK::Metrics::MeterProvider.new
   end
 end

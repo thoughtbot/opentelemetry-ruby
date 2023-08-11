@@ -162,7 +162,7 @@ module OpenTelemetry
       # @api private
       def each_instrument
         @mutex.synchronize do
-          instrument_registry.each do |name, instrument|
+          @instrument_registry.each do |name, instrument|
             yield(name, instrument)
           end
         end

@@ -34,14 +34,13 @@ module OpenTelemetry
               NOOP_METER
             else
               key = build_key_for_meter(name, version, schema_url)
-              meter = Meter.new(
+
+              @meter_registry[key] ||= Meter.new(
                 name,
                 version: version,
                 schema_url: schema_url,
                 attributes: attributes
               )
-
-              @meter_registry[key] ||= meter
             end
           end
         end
@@ -170,17 +169,17 @@ module OpenTelemetry
         # https://opentelemetry.io/docs/specs/otel/metrics/sdk/#default-aggregation
         def build_default_aggregation_for(instrument)
           case instrument
-          when Counter
+          when Instrument::Counter
             Aggregation::Sum.new
-          when Histogram
+          when Instrument::Histogram
             Aggregation::ExplicitBucketHistogram.new
-          when UpDownCounter
+          when Instrument::UpDownCounter
             Aggregation::Sum.new
-          when ObservableCounter
+          when Instrument::ObservableCounter
             # TODO: ?
-          when ObservableGauge
+          when Instrument::ObservableGauge
             # TODO: ?
-          when ObservableUpDownCounter
+          when Instrument::ObservableUpDownCounter
             # TODO: ?
           end
         end
