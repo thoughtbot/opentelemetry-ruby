@@ -11,7 +11,7 @@ module OpenTelemetry
     module Metrics
       # {Meter} is the SDK implementation of {OpenTelemetry::Metrics::Meter}.
       class Meter < OpenTelemetry::Metrics::Meter
-        # TODO: refer yard doc comments to API
+        attr_reader :instrumentation_scope
 
         def initialize(*args, **kwargs)
           super
