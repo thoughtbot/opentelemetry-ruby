@@ -109,7 +109,7 @@ module OpenTelemetry
         end
 
         # @api private
-        def register_metric_store(metric_store, aggregation: nil)
+        def register_metric_store(metric_store, aggregation)
           each_instrument do |_name, instrument|
             build_and_add_metric_stream(metric_store, instrument, aggregation)
           end
@@ -143,15 +143,17 @@ module OpenTelemetry
           when Instrument::Counter
             Aggregation::Sum.new
           when Instrument::Histogram
+            # TODO: check instrument's advice for explicit_bucket_boundaries
+            # and use it to create the default ExplicitBucketHistogram
             Aggregation::ExplicitBucketHistogram.new
           when Instrument::UpDownCounter
             Aggregation::Sum.new
           when Instrument::ObservableCounter
-            # TODO: ?
+            Aggregation::Sum.new
           when Instrument::ObservableGauge
-            # TODO: ?
+            Aggregation::LastValue.new
           when Instrument::ObservableUpDownCounter
-            # TODO: ?
+            Aggregation::Sum.new
           end
         end
       end
