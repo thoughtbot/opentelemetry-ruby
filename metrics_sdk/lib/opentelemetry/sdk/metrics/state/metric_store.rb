@@ -24,18 +24,18 @@ module OpenTelemetry
           def collect
             @mutex.synchronize do
               @epoch_end_time = now_in_nano
-              snapshot = @metric_streams.map do |metric_stream|
+              metric_data = @metric_streams.map do |metric_stream|
                 metric_stream.collect(@epoch_start_time, @epoch_end_time)
               end
               @epoch_start_time = @epoch_end_time
 
-              snapshot
+              metric_data
             end
           end
 
           def add_metric_stream(metric_stream)
             @mutex.synchronize do
-              @metric_streams = @metric_streams.dup.push(metric_stream)
+              @metric_streams.push(metric_stream)
               nil
             end
           end

@@ -13,7 +13,7 @@ module OpenTelemetry
 
       private_constant :NOOP_METER, :Key
 
-      attr_reader :resource, :metric_readers
+      attr_reader :resource
 
       def initialize(resource: nil)
         @resource = resource

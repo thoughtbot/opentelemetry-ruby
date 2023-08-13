@@ -28,6 +28,7 @@ module OpenTelemetry
         def add_metric_stream(metric_stream)
           @mutex.synchronize do
             @metric_streams.push(metric_stream)
+            nil
           end
         end
 
