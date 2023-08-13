@@ -11,41 +11,43 @@ module OpenTelemetry
         # Contains the implementation of the Sum aggregation
         # https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/sdk.md#sum-aggregation
         class Sum
+          attr_reader :aggregation_temporality, :monotonic
+
           def initialize(aggregation_temporality: :delta, monotonic: true)
             @aggregation_temporality = aggregation_temporality
             @monotonic = monotonic
 
-            @data_points = {}
+            @number_data_points = {}
           end
 
-          def collect(start_time, end_time)
-            if @aggregation_temporality == :delta
-              # Set timestamps and 'move' data point values to result.
-              ndps = @data_points.each_value do |ndp|
-                ndp.start_time_unix_nano = start_time
-                ndp.time_unix_nano = end_time
+          def update(increment, attributes)
+            @number_data_points[attributes] ||= build_number_data_point(attributes)
+            @number_data_points[attributes].value += increment
+            nil
+          end
+
+          def collect(start_time_unix_nano, end_time_unix_nano)
+            if aggregation_temporality == :delta
+              ndps = @number_data_points.map do |_attributes, ndp|
+                ndp.start_time_unix_nano = start_time_unix_nano
+                ndp.time_unix_nano = end_time_unix_nano
+                ndp
               end
-              @data_points.clear
+              @number_data_points.clear
               ndps
             else
-              # Update timestamps and take a snapshot.
-              @data_points.values.map! do |ndp|
-                ndp.start_time_unix_nano ||= start_time # Start time of a data point is from the first observation.
-                ndp.time_unix_nano = end_time
+              @number_data_points.map do |_attributes, ndp|
+                # Start time of data point is from the first observation.
+                ndp.start_time_unix_nano ||= start_time_unix_nano
+                ndp.time_unix_nano = end_time_unix_nano
                 ndp.dup
               end
             end
           end
 
-          def update(increment, attributes)
-            @data_points[attributes] ||= build_data_point(attributes)
-            @data_points[attributes].value += increment
-            nil
-          end
-
           private
 
-          def build_data_point(attributes)
+          def build_number_data_point(attributes)
             NumberDataPoint.new(
               attributes,
               nil,

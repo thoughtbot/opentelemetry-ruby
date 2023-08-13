@@ -7,69 +7,179 @@
 require 'test_helper'
 
 describe OpenTelemetry::SDK::Metrics::Aggregation::Sum do
-  let(:sum_aggregation) { OpenTelemetry::SDK::Metrics::Aggregation::Sum.new(aggregation_temporality: aggregation_temporality) }
-  let(:aggregation_temporality) { :delta }
+  let(:start_time_unix_nano) { now_in_nano }
+  let(:end_time_unix_nano) { start_time_unix_nano + 60*(10**9) }
 
-  # Time in nano
-  let(:start_time) { (Time.now.to_r * 1_000_000_000).to_i }
-  let(:end_time) { ((Time.now + 60).to_r * 1_000_000_000).to_i }
+  describe '.new' do
+    it 'defaults to aggregation_temporality :delta' do
+      sum = build_sum
 
-  it 'sets the timestamps' do
-    sum_aggregation.update(0, {})
-    ndp = sum_aggregation.collect(start_time, end_time)[0]
-    _(ndp.start_time_unix_nano).must_equal(start_time)
-    _(ndp.time_unix_nano).must_equal(end_time)
-  end
-
-  it 'aggregates and collects' do
-    sum_aggregation.update(1, {})
-    sum_aggregation.update(2, {})
-
-    sum_aggregation.update(2, 'foo' => 'bar')
-    sum_aggregation.update(2, 'foo' => 'bar')
-
-    ndps = sum_aggregation.collect(start_time, end_time)
-    _(ndps[0].value).must_equal(3)
-    _(ndps[0].attributes).must_equal({})
-
-    _(ndps[1].value).must_equal(4)
-    _(ndps[1].attributes).must_equal('foo' => 'bar')
-  end
-
-  it 'does not aggregate between collects' do
-    sum_aggregation.update(1, {})
-    sum_aggregation.update(2, {})
-    ndps = sum_aggregation.collect(start_time, end_time)
-
-    sum_aggregation.update(1, {})
-    # Assert that the recent update does not
-    # impact the already collected metrics
-    _(ndps[0].value).must_equal(3)
-
-    ndps = sum_aggregation.collect(start_time, end_time)
-    # Assert that we are not accumulating values
-    # between calls to collect
-    _(ndps[0].value).must_equal(1)
-  end
-
-  describe 'when aggregation_temporality is not delta' do
-    let(:aggregation_temporality) { :not_delta }
-
-    it 'allows metrics to accumulate' do
-      sum_aggregation.update(1, {})
-      sum_aggregation.update(2, {})
-      ndps = sum_aggregation.collect(start_time, end_time)
-
-      sum_aggregation.update(1, {})
-      # Assert that the recent update does not
-      # impact the already collected metrics
-      _(ndps[0].value).must_equal(3)
-
-      ndps = sum_aggregation.collect(start_time, end_time)
-      # Assert that we are accumulating values
-      # and not just capturing the delta since
-      # the previous collect call
-      _(ndps[0].value).must_equal(4)
+      assert(sum.aggregation_temporality == :delta)
     end
+
+    it 'defaults to monotonic true' do
+      sum = build_sum
+
+      assert(sum.monotonic == true)
+    end
+  end
+
+  describe '#aggregation_temporality' do
+    it 'returns aggregation_temporality' do
+      sum = build_sum(aggregation_temporality: :delta)
+      assert(sum.aggregation_temporality == :delta)
+
+      sum = build_sum(aggregation_temporality: :cumulative)
+      assert(sum.aggregation_temporality == :cumulative)
+    end
+  end
+
+  describe '#monotonic' do
+    it 'returns monotonic' do
+      sum = build_sum(monotonic: true)
+      assert(sum.monotonic == true)
+
+      sum = build_sum(monotonic: false)
+      assert(sum.monotonic == false)
+    end
+  end
+
+  describe '#update' do
+    describe 'when number data point does not exist' do
+      it 'creates a new one and set increment' do
+        sum = build_sum
+
+        sum.update(5, { 'service' => 'aaa' })
+        sum.update(1, { 'service' => 'bbb' })
+
+        number_data_points = sum.collect(start_time_unix_nano, end_time_unix_nano)
+        assert(number_data_points.size == 2)
+
+        assert(number_data_points[0].value == 5)
+        assert(number_data_points[0].attributes == { 'service' => 'aaa' })
+
+        assert(number_data_points[1].value == 1)
+        assert(number_data_points[1].attributes == { 'service' => 'bbb' })
+      end
+    end
+
+    describe 'when number data point exists' do
+      it 'updates the existing one adding increment' do
+        sum = build_sum
+
+        sum.update(5, { 'service' => 'aaa' })
+        sum.update(1, { 'service' => 'bbb' })
+        sum.update(10, { 'service' => 'aaa' })
+
+        number_data_points = sum.collect(start_time_unix_nano, end_time_unix_nano)
+        assert(number_data_points.size == 2)
+
+        assert(number_data_points[0].value == 15)
+        assert(number_data_points[0].attributes == { 'service' => 'aaa' })
+
+        assert(number_data_points[1].value == 1)
+        assert(number_data_points[1].attributes == { 'service' => 'bbb' })
+      end
+    end
+  end
+
+  describe '#collect' do
+    describe 'when aggregation_temporality is :delta' do
+      it'sets timestamps, returns array of number data points and clears, not aggregating between calls' do
+        sum = build_sum(aggregation_temporality: :delta)
+
+        sum.update(5, { 'service' => 'aaa' })
+        sum.update(1, { 'service' => 'bbb' })
+
+        number_data_points = sum.collect(start_time_unix_nano, end_time_unix_nano)
+        assert(number_data_points.size == 2)
+
+        assert(number_data_points[0].value == 5)
+        assert(number_data_points[0].attributes == { 'service' => 'aaa' })
+        assert(number_data_points[0].start_time_unix_nano == start_time_unix_nano)
+        assert(number_data_points[0].time_unix_nano == end_time_unix_nano)
+
+        assert(number_data_points[1].value == 1)
+        assert(number_data_points[1].attributes == { 'service' => 'bbb' })
+        assert(number_data_points[1].start_time_unix_nano == start_time_unix_nano)
+        assert(number_data_points[1].time_unix_nano == end_time_unix_nano)
+
+        new_start_time_unix_nano = start_time_unix_nano + 10*(10**9)
+        new_end_time_unix_nano = end_time_unix_nano + 10*(10**9)
+
+        number_data_points = sum.collect(new_start_time_unix_nano, new_end_time_unix_nano)
+        assert(number_data_points.empty?)
+
+        sum.update(10, { 'service' => 'aaa' })
+
+        number_data_points = sum.collect(new_start_time_unix_nano, new_end_time_unix_nano)
+        assert(number_data_points.size == 1)
+
+        assert(number_data_points[0].value == 10)
+        assert(number_data_points[0].attributes == { 'service' => 'aaa' })
+        assert(number_data_points[0].start_time_unix_nano == new_start_time_unix_nano)
+        assert(number_data_points[0].time_unix_nano == new_end_time_unix_nano)
+
+        number_data_points = sum.collect(new_start_time_unix_nano, new_end_time_unix_nano)
+        assert(number_data_points.empty?)
+      end
+    end
+
+    describe 'when aggregation_temporality is not :delta' do
+      it 'sets timestamps, returns array of number data points but does not clear, aggregating between calls' do
+        sum = build_sum(aggregation_temporality: :anything)
+
+        sum.update(5, { 'service' => 'aaa' })
+        sum.update(1, { 'service' => 'bbb' })
+
+        number_data_points = sum.collect(start_time_unix_nano, end_time_unix_nano)
+        assert(number_data_points.size == 2)
+
+        assert(number_data_points[0].value == 5)
+        assert(number_data_points[0].attributes == { 'service' => 'aaa' })
+        assert(number_data_points[0].start_time_unix_nano == start_time_unix_nano)
+        assert(number_data_points[0].time_unix_nano == end_time_unix_nano)
+
+        assert(number_data_points[1].value == 1)
+        assert(number_data_points[1].attributes == { 'service' => 'bbb' })
+        assert(number_data_points[1].start_time_unix_nano == start_time_unix_nano)
+        assert(number_data_points[1].time_unix_nano == end_time_unix_nano)
+
+        sum.update(10, { 'service' => 'aaa' })
+        sum.update(3, { 'service' => 'ccc' })
+
+        new_start_time_unix_nano = start_time_unix_nano + 10*(10**9)
+        new_end_time_unix_nano = end_time_unix_nano + 10*(10**9)
+
+        number_data_points = sum.collect(new_start_time_unix_nano, new_end_time_unix_nano)
+        assert(number_data_points.size == 3)
+
+        assert(number_data_points[0].value == 15)
+        assert(number_data_points[0].attributes == { 'service' => 'aaa' })
+        assert(number_data_points[0].start_time_unix_nano == start_time_unix_nano)
+        assert(number_data_points[0].time_unix_nano == new_end_time_unix_nano)
+
+        assert(number_data_points[1].value == 1)
+        assert(number_data_points[1].attributes == { 'service' => 'bbb' })
+        assert(number_data_points[1].start_time_unix_nano == start_time_unix_nano)
+        assert(number_data_points[1].time_unix_nano == new_end_time_unix_nano)
+
+        assert(number_data_points[2].value == 3)
+        assert(number_data_points[2].attributes == { 'service' => 'ccc' })
+        assert(number_data_points[2].start_time_unix_nano == new_start_time_unix_nano) # new start time
+        assert(number_data_points[2].time_unix_nano == new_end_time_unix_nano)
+
+        number_data_points = sum.collect(new_start_time_unix_nano, new_end_time_unix_nano)
+        assert(number_data_points.size == 3)
+      end
+    end
+  end
+
+  def now_in_nano
+    (Time.now.to_r * 1_000_000_000).to_i
+  end
+
+  def build_sum(**kwargs)
+    OpenTelemetry::SDK::Metrics::Aggregation::Sum.new(**kwargs)
   end
 end
